@@ -8,102 +8,79 @@
 #include <stdlib.h>
 #include <string.h>
 
-char* readline();
 
-typedef struct stack
+typedef struct node
 {
-  char data;
-  struct stack* next;
-}st;
-char peek(st* top)
+    char data;
+    struct node * next;
+}node;
+void push(node ** head,char value)
 {
-  return top->data;
+    node * newnode=(node*)malloc(sizeof(node));
+    newnode->data=value;
+    newnode->next=(*head);
+    (*head)=newnode;
 }
-void pop(st** top)
+int empty(node * head)
 {
-  *top= (*top)->next;
+    if(head==NULL)return 1;
+    else return 0;
 }
-void push(st** top, char c)
+char top(node * head)
 {
-  struct stack *tmp;
-  tmp = (st*)malloc(sizeof(st));
-  tmp -> data = c;
-  tmp -> next= *top;
-  (*top)=tmp;
+    if(head)
+    return head->data;
+    else return 'y';
 }
-int empty(st** top)
+void pop(node ** head)
 {
-  if((*top)==NULL)
-  {
-    return 1;
-  }
-  return 0;
-}
-
-char** braces(int values_count, char** values, int* result_count) {
-    char** result = (char**)malloc(values_count * sizeof(char*));
-    int count = 0 ;
-    char* yes="YES";
-    char* no="NO";
-    st* s;
-    for(int i=0;i<values_count;i++)
+    if((*head)!=NULL)
     {
-        s=NULL;
-        char* str=*(values+i);
-        for(int j=0;(*(str+j))!='\0';j++)
+        (*head)=(*head)->next;
+    }
+}
+char** braces(int n, char** arr, int* result) 
+{
+    char ** res = (char**)malloc(n*sizeof(char*));
+    int i=0,j=0,k=0;
+    for(i=0;i<n;i++)
+    {
+        node *head= NULL;
+        for(j=0;arr[i][j]!='\0';j++)
         {
-            char c=*(str+j);
-            if(empty(&s))
+            if(arr[i][j]=='(' || arr[i][j]=='[' || arr[i][j]=='{')
             {
-               push(&s,c);
+                push(&head,arr[i][j]);
             }
             else
             {
-
-              if((c=='{') || (c=='[') || (c=='('))
-              {
-
-                  push(&s, c);
-              }
-                else
-                {
-
-                    if((c=='}') && (peek(s)=='{'))
-                    {
-                        pop(&s);
-                    }
-                    else if((c==']') && (peek(s)=='['))
-                    {
-                        pop(&s);
-                    }
-                    else if((c==')') && (peek(s)=='('))
-                    {
-                        pop(&s);
-                    }
+                if(arr[i][j]=='}' && top(head)=='{')
+                pop(&head);
+                else{
+                         if(arr[i][j]==')' && top(head)=='(')
+                         pop(&head);
                     else
                     {
-                        break;
+                          if(arr[i][j]==']' && top(head)=='[')
+                          pop(&head);
+                          else
+                          push(&head,'x');
                     }
                 }
             }
         }
-        if(empty(&s))
+        if(empty(head)==0)
         {
-            *(result+i)=yes;
-
+            res[k++]="NO";
         }
         else
         {
-            *(result+i)=no;
+            res[k++]="YES";
         }
-        count++;
     }
-    *result_count=count;
-    return result;
-
-
+    *result=n;
+    return res;
 }
-
 int main()
 {
     FILE* fptr = fopen(getenv("OUTPUT_PATH"), "w");
